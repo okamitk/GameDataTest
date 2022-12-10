@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 import pandas as pd
-import numpy as np
+#import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -28,7 +28,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])
 # Other_Sales - Vendas no resto do mundo (em milhões)
 # Global_Sales - Total de vendas mundiais.
 
-# Carregando os dados usando pandas 
+# Carregando os dados usando pandas
 df = pd.read_csv('app/vgsales.csv')
 df['Year'] = pd.to_datetime(df['Year'])
 
@@ -50,11 +50,14 @@ genero_fig = px.bar(df_genero, y="Genre", color="Genre",orientation="h")
 
 df_classificacao = px.bar(df_classificacao, x="Rank", color="Rank", orientation="h")
 
-vendas_fig_pizza = px.pie(df_vendas, values=['NA_Sales','EU_Sales','JP_Sales'], 
-        names='df_total', hole=.4)
+vendas_fig_pizza = px.pie(df_genero, values= 'Global_Sales',
+        names='Genre', hole=.4)
+#Como eu fiz/tentei fazer esse gráfico de pizza acima:
+# A primeira variável é o que eu queria "gerenciar" no gráfico
+# Em values eu passei o "filtro", ou seja, "eu vou agrupar o gênero em que quesito, com base em q?"
+# Em names eu só passei o grupo que é o primeiro df, nesse caso, Genre (genero) e deu certo 👍
 
-sexo_fig = px.pie(
-        df_genero, values='Genre', 
+sexo_fig = px.pie(df_genero, values='Genre',
         names='Rank', hole=.4)
 
 # =========  Layout  =========== #
@@ -71,28 +74,29 @@ app.layout = html.Div(children=[
             html.P("Menu de navegação",
                     className="fs-4 text-center mb-0"),
             html.Hr(), 
-            html.P("Selecione a(s) cidade(s)",
-                    className="mb-0"),
-                dbc.Checklist(
-                    options=[{"label": x, "value": x} for x in df["City"].unique()], 
-                    value=df["City"].unique(),
-                    inline=True,
-                    id="checklist_city"),
-                html.P("Selecione o período",
-                    className="mb-0"),
-                 dcc.YearPickerRange(
-                    start_Year=df["Year"].min(), end_Year=df["Year"].max(), className="mb-2",
-                    display_format="DD/MM/YYYY",
-                    id="periodo"
-                ),
-                html.P("Selecione a(s) categoria(s)",
-                className="mb-0"),
-                dcc.Dropdown(
-                    df["Product line"].unique(),
-                    df["Product line"].unique(),
-                    id="categoria",
-                    multi=True
-                ),
+    #ISTO ESTÁ COMO COMENTÁRIO APENAS PARA COMEÇAR A TESTAR OS GRÁFICOS
+            # html.P("Selecione a(s) cidade(s)",
+            #         className="mb-0"),
+            #     dbc.Checklist(
+            #         options=[{"label": x, "value": x} for x in df["City"].unique()], 
+            #         value=df["City"].unique(),
+            #         inline=True,
+            #         id="checklist_city"),
+            #     html.P("Selecione o período",
+            #         className="mb-0"),
+            #      dcc.YearPickerRange(
+            #         start_Year=df["Year"].min(), end_Year=df["Year"].max(), className="mb-2",
+            #         display_format="DD/MM/YYYY",
+            #         id="periodo"
+            #     ),
+            #     html.P("Selecione a(s) categoria(s)",
+            #     className="mb-0"),
+            #     dcc.Dropdown(
+            #         df["Product line"].unique(),
+            #         df["Product line"].unique(),
+            #         id="categoria",
+            #         multi=True
+            #     ),
           ], className="p-2")  
         ],sm=3),
 
@@ -103,9 +107,10 @@ app.layout = html.Div(children=[
                 dbc.Col([
                     dcc.Graph(figure=vendas_fig,id="vendas_fig"),
                 ], sm=4, className="me-0 pe-0"),
-                dbc.Col([
-                    dcc.Graph(figure=pagamentos_fig,id="pagamentos_fig"),
-                ], sm=4, className="ms-0 me-0 ps-0 pe-0"),
+        #NÃO SEI PQ ISSO TA COMO COMENTÁRIO MAS TA XD
+                # dbc.Col([
+                #     dcc.Graph(figure=pagamentos_fig,id="pagamentos_fig"),
+                # ], sm=4, className="ms-0 me-0 ps-0 pe-0"),
                 dbc.Col([
                     dcc.Graph(figure=df_classificacao,id="df_classificacao"),
                 ], sm=4, className="ms-0 ps-0"),
