@@ -1,16 +1,14 @@
 from dash import html, dcc
+import dash
 from dash.dependencies import Input, Output
 from dash_bootstrap_templates import load_figure_template
 import dash_bootstrap_components as dbc
 import pandas as pd
-import dash
 import plotly.express as px
 import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-import dash_core_components as dcc
-import dash_html_components as html
 
 load_figure_template(["cyborg"])
 
@@ -31,15 +29,14 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])
 # Global_Sales - Total de vendas mundiais.
 
 # Carregando os dados usando pandas 
-df = pd.read_csv('vgsales.csv')
+df = pd.read_csv('app/vgsales.csv')
 df['Year'] = pd.to_datetime(df['Year'])
-print(df.dtypes)
 
 #Dados para os gráficos
 
-df_classificacao= df.groupby('Rank').sum().reset_index()
-df_nome= df.groupby('Name').sum().reset_index()
-df_plataforma= df.groupby('Platform').sum().reset_index()
+df_classificacao = df.groupby('Rank').sum().reset_index()
+df_nome = df.groupby('Name').sum().reset_index()
+df_plataforma = df.groupby('Platform').sum().reset_index()
 df_genero = df.groupby('Genre').sum().reset_index()
 df_editora = df.groupby('Publisher').sum().reset_index()
 df_vendas = df.groupby(['NA_Sales','EU_Sales','JP_Sales']).sum().reset_index()
@@ -48,28 +45,23 @@ df_total = df.groupby('Global_Sales').sum().reset_index()
 
 #Criação dos gráficos
 
-vendas_fig = px.bar(df_total,x='Global Sales',y='Platform')
-genero_fig = px.bar(df_genero, y="Genre",
-                    x="Platform", color="Genre",orientation="h")
+vendas_fig = px.bar(df_total,x='Global_Sales')
+genero_fig = px.bar(df_genero, y="Genre", color="Genre",orientation="h")
 
-df_classificacao = px.bar(df_classificacao, x="Rank",
-                    y="Name", color="Rank", orientation="h")
+df_classificacao = px.bar(df_classificacao, x="Rank", color="Rank", orientation="h")
 
-vendas_fig_pizza = px.pie(
-        df_vendas, values='gross income', 
-        names='City', hole=.4)
+vendas_fig_pizza = px.pie(df_vendas, values=['NA_Sales','EU_Sales','JP_Sales'], 
+        names='df_total', hole=.4)
 
 sexo_fig = px.pie(
-        df_sexo, values='gross income', 
-        names='Gender', hole=.4)
+        df_genero, values='Genre', 
+        names='Rank', hole=.4)
 
 # =========  Layout  =========== #
 
 app.layout = html.Div(children=[
     html.Img(id="logo", src=("https://nadic.ifrn.edu.br/static/img/part/ifpb.png"), height=85), 
     html.H1(children='Video Games Sales'),
-    html.Div(children='''Este conjunto de dados contém uma lista de videogames com vendas superiores a 100.000 cópias. Foi gerado por uma raspagem de vgchartz.com'''),  
-    html.P("""Utilize este dashboard para analisar vendas de video games"""),
     html.Div([
     html.H5(children=":D")], style={"background-color": "#1E1E1E", "margin": "-25px", "padding": "25px"}),
     
@@ -88,8 +80,8 @@ app.layout = html.Div(children=[
                     id="checklist_city"),
                 html.P("Selecione o período",
                     className="mb-0"),
-                 dcc.DatePickerRange(
-                    start_date=df["Date"].min(), end_date=df["Date"].max(), className="mb-2",
+                 dcc.YearPickerRange(
+                    start_Year=df["Year"].min(), end_Year=df["Year"].max(), className="mb-2",
                     display_format="DD/MM/YYYY",
                     id="periodo"
                 ),
@@ -141,13 +133,13 @@ app.layout = html.Div(children=[
 ],
     [
     Input("checklist_city", "value"),
-    Input("periodo", "start_date"),
-    Input("periodo", "end_date"),
+    Input("periodo", "start_Year"),
+    Input("periodo", "end_Year"),
     Input("categoria", "value"),
 
 ])
 def atualizar_graficos(cidades, data_inicial, data_final, categoria):
-    df_cidades = df[ (df["City"].isin(cidades)) & (df["Date"] >= data_inicial) & (df["Date"] <= data_final) & (df["Product line"].isin(categoria))]
+    df_cidades = df[ (df["City"].isin(cidades)) & (df["Year"] >= data_inicial) & (df["Year"] <= data_final) & (df["Product line"].isin(categoria))]
      
     faturamento = df_cidades.groupby('City').sum().reset_index()
     pagamento = df_cidades.groupby('Payment').sum().reset_index()
