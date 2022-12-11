@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 import pandas as pd
-#import numpy as np
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
@@ -28,13 +28,13 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.CYBORG])
 # Other_Sales - Vendas no resto do mundo (em milhões)
 # Global_Sales - Total de vendas mundiais.
 
-# Carregando os dados usando pandas
-df = pd.read_csv('app/vgsales.csv')
+# Carregando os dados usando pandas 
+df = pd.read_csv('vgsales.csv')
 df['Year'] = pd.to_datetime(df['Year'])
 
 #Dados para os gráficos
 
-df_classificacao = df.groupby('Rank').sum().reset_index()
+df_classificacao = df.groupby(['Rank', 'Genre']).agg({'Global_Sales': np.sum}).reset_index()
 df_nome = df.groupby('Name').sum().reset_index()
 df_plataforma = df.groupby('Platform').sum().reset_index()
 df_genero = df.groupby('Genre').sum().reset_index()
@@ -48,14 +48,13 @@ df_total = df.groupby('Global_Sales').sum().reset_index()
 vendas_fig = px.bar(df_total,x='Global_Sales')
 genero_fig = px.bar(df_genero, y="Genre", color="Genre",orientation="h")
 
-df_classificacao = px.bar(df_classificacao, x="Rank", color="Rank", orientation="h")
+XD_fig = px.bar(df_classificacao, x='Rank', y='Global_Sales', color='Genre', barmode='group')
+Teste_fig = px.scatter(df, x='Global_Sales', y='Genre')
+
+classificacao_fig = px.bar(df_classificacao, x="Rank", color="Rank", orientation="h")
 
 vendas_fig_pizza = px.pie(df_genero, values= 'Global_Sales',
         names='Genre', hole=.4)
-#Como eu fiz/tentei fazer esse gráfico de pizza acima:
-# A primeira variável é o que eu queria "gerenciar" no gráfico
-# Em values eu passei o "filtro", ou seja, "eu vou agrupar o gênero em que quesito, com base em q?"
-# Em names eu só passei o grupo que é o primeiro df, nesse caso, Genre (genero) e deu certo 👍
 
 sexo_fig = px.pie(df_genero, values='Genre',
         names='Rank', hole=.4)
@@ -74,7 +73,6 @@ app.layout = html.Div(children=[
             html.P("Menu de navegação",
                     className="fs-4 text-center mb-0"),
             html.Hr(), 
-    #ISTO ESTÁ COMO COMENTÁRIO APENAS PARA COMEÇAR A TESTAR OS GRÁFICOS
             # html.P("Selecione a(s) cidade(s)",
             #         className="mb-0"),
             #     dbc.Checklist(
@@ -107,12 +105,11 @@ app.layout = html.Div(children=[
                 dbc.Col([
                     dcc.Graph(figure=vendas_fig,id="vendas_fig"),
                 ], sm=4, className="me-0 pe-0"),
-        #NÃO SEI PQ ISSO TA COMO COMENTÁRIO MAS TA XD
-                # dbc.Col([
-                #     dcc.Graph(figure=pagamentos_fig,id="pagamentos_fig"),
-                # ], sm=4, className="ms-0 me-0 ps-0 pe-0"),
                 dbc.Col([
-                    dcc.Graph(figure=df_classificacao,id="df_classificacao"),
+                    dcc.Graph(figure=classificacao_fig,id="classificacao_fig"),
+                ], sm=4, className="ms-0 me-0 ps-0 pe-0"),
+                dbc.Col([
+                    dcc.Graph(figure=Teste_fig,id="Teste_fig"),
                 ], sm=4, className="ms-0 ps-0"),
             ]),
             dbc.Row([
@@ -120,7 +117,7 @@ app.layout = html.Div(children=[
                     dcc.Graph(figure=vendas_fig_pizza,id="vendas_fig_pizza"),
                 ], sm=6, className="me-0 pe-0"),
                 dbc.Col([
-                    dcc.Graph(figure=sexo_fig, id="sexo_fig")
+                    dcc.Graph(figure=XD_fig, id="XD_fig")
                 ], sm=6, className="ms-0 ps-0"),
             ])
         ],sm=9)
@@ -131,10 +128,10 @@ app.layout = html.Div(children=[
 
 @app.callback([
     Output("vendas_fig", "figure"),
-    Output("pagamentos_fig", "figure"),
-    Output("df_classificacao", "figure"),
+    Output("classificacao_fig", "figure"),
+    Output("Teste_fig", "figure"),
     Output("vendas_fig_pizza", "figure"),    
-    Output("sexo_fig", "figure"),
+    Output("XD_fig", "figure"),
 ],
     [
     Input("checklist_city", "value"),
@@ -153,23 +150,23 @@ def atualizar_graficos(cidades, data_inicial, data_final, categoria):
 
     cidade_fig = px.bar(faturamento, x="City", y="gross income",
     )    
-    pagamentos_fig = px.bar(pagamento, y="Payment",
+    classificacao_fig = px.bar(pagamento, y="Payment",
                             x="gross income", orientation="h",
                             )    
-    df_classificacao = px.bar(produtos, x="gross income",
+    Teste_fig = px.bar(produtos, x="gross income",
                           y="Product line", color="City", 
                           orientation="h",
                           )        
     vendas_fig_pizza = px.pie(df_cidades, 
     values='gross income', names='City', hole=.4,
     )
-    sexo_fig = px.pie(
+    XD_fig = px.pie(
         sexo, values='gross income', names='Gender', 
         title='Faturamento por sexo',  hole=.4,
         )
         
 
-    return cidade_fig, pagamentos_fig, df_classificacao, vendas_fig_pizza, sexo_fig
+    return cidade_fig, pagamentos_fig, Teste_fig, vendas_fig_pizza, XD_fig, classificacao_fig
 
 
 if __name__ == "__main__":
