@@ -31,7 +31,6 @@ df = pd.read_csv('vgsales.csv')
 df_genero = df.groupby('Genre').sum().reset_index()
 df_total = df.groupby(['Global_Sales', 'Name'], sort=False).sum().head(10).reset_index()
 df_agrupado_pelo_dia = df.groupby('Year', sort=False).agg({ 'Global_Sales': np.sum }).reset_index()
-df_publicadoras_por_vendas = df.groupby(['Publisher', 'Year'], sort=False).agg({ 'Global_Sales': np.mean }).head(10).reset_index()
 df_vendas_continentes = df.groupby(['Other_Sales', 'JP_Sales', 'EU_Sales', 'NA_Sales'], sort=False).agg({ 'Global_Sales': np.mean }).head(10).reset_index()
 df_publicadoras_por_vendas = df.groupby(['Publisher', 'Year'], sort=False).agg({ 'Global_Sales': np.mean }).head(50).reset_index()
 
